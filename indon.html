@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel File Processing</title>
+    <title>Excel Processor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
-    <h1>Upload Two Excel Files</h1>
-    <p>Select the two Excel files you want to upload:</p>
+    <h1>Upload and Process Excel Files</h1>
+    <p>Upload two Excel files to process:</p>
 
+    <!-- Upload file inputs -->
     <input type="file" id="file1" accept=".xlsx" />
     <input type="file" id="file2" accept=".xlsx" />
-    <br/><br/>
+    <br><br>
     <button onclick="processFiles()">Process Files</button>
 
     <h3>Download Processed Files:</h3>
@@ -22,6 +23,7 @@
     <script>
         let file1Data, file2Data;
 
+        // Handle file uploads
         function handleFileUpload(event, callback) {
             const reader = new FileReader();
             const file = event.target.files[0];
@@ -37,6 +39,7 @@
             reader.readAsArrayBuffer(file);
         }
 
+        // Load files when uploaded
         document.getElementById('file1').addEventListener('change', function(event) {
             handleFileUpload(event, function(data) {
                 file1Data = data;
@@ -51,31 +54,32 @@
             });
         });
 
+        // Main function to process the files
         function processFiles() {
             if (!file1Data || !file2Data) {
                 alert("Please upload both files.");
                 return;
             }
 
-            // Convert file1Data and file2Data into structured data
+            // Process data from both files
             let df1 = processExcelData(file1Data);
             let df2 = processExcelData(file2Data);
 
-            // Clean and join the data (mock-up of what you did in Python)
+            // Clean the data and remove duplicates
             df2 = removeDuplicates(df2, 'Điện thoại');
             let result = joinData(df1, df2, 'Điện thoại');
 
-            // Apply 'New ghi chú' update logic
+            // Update the 'New ghi chú' column
             result = updateGhiChu(result);
 
             // Split the data into 4 parts and sort by 'Mã'
             let splitResults = splitAndSort(result, 4, 'Mã');
 
-            // Create download links for each part
+            // Generate download links for the processed files
             createDownloadLinks(splitResults);
         }
 
-        // Helper function to process the raw Excel data
+        // Process raw Excel data into an array of objects
         function processExcelData(data) {
             const headers = data[1];
             const rows = data.slice(2);
@@ -88,14 +92,14 @@
             });
         }
 
-        // Helper function to remove duplicates based on a key
+        // Remove duplicates based on a specific key
         function removeDuplicates(data, key) {
             return data.filter((value, index, self) => {
                 return self.findIndex(item => item[key] === value[key]) === index;
             });
         }
 
-        // Helper function to join two datasets based on a key
+        // Join two datasets based on a key
         function joinData(data1, data2, key) {
             return data1.map(row1 => {
                 let row2 = data2.find(row => row[key] === row1[key]);
@@ -117,7 +121,7 @@
             });
         }
 
-        // Split and sort the data into parts
+        // Split data into parts and sort by a specific key
         function splitAndSort(data, parts, sortKey) {
             const shuffledData = data.sort(() => 0.5 - Math.random());
             const chunkSize = Math.ceil(shuffledData.length / parts);
@@ -131,7 +135,7 @@
             return chunks;
         }
 
-        // Create download links for each part
+        // Create download links for the processed files
         function createDownloadLinks(datasets) {
             const container = document.getElementById('download-links');
             container.innerHTML = '';
